@@ -62,11 +62,27 @@ class Compute_engine:
             zone=self.zone,
             operation=operation).execute()
             if result['status'] == 'DONE':
-                print("done.")
+                print("deployment completed.")
                 if 'error' in result:
                     raise Exception(result['error'])
                 return result
         time.sleep(1)
+
     def list_instances(self):
         result = self.compute.instances().list(project=self.project, zone=self.zone).execute()
         return result['items'] if 'items' in result else None
+
+    def get_details(self,data:dict):
+        result =self.compute.instances().get(project=self.project,
+        zone=self.zone,
+        instance=self.name).execute()
+        if "networkInterfaces" in result:
+            data['instance_ip']       = result['networkInterfaces'][0]["networkIP"]
+            data['job_status']        = 'completed'
+            data['deployment_status'] = result['status']
+            data['deployed_on']       = result["creationTimestamp"]
+        return data
+        
+        
+
+        
